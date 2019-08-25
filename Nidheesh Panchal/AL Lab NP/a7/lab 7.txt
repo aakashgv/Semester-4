@@ -1,0 +1,5 @@
+Create random graph.
+
+Task 1. DFS
+Task 2. BFS
+Task 3. Articulation point

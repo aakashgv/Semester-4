@@ -1,0 +1,10 @@
+Accept command line argument and print pattern accordingly
+
+2:
+a
+aba
+
+3:
+a
+aca
+aceca

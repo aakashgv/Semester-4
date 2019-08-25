@@ -1,0 +1,178 @@
+#include<stdio.h>
+#include<string.h>
+#include<time.h>
+#include<math.h>
+#include<sys/time.h>
+
+long time_start, time_end;
+int InitializeBase(FILE *f1,FILE *f2);
+void add();
+void subtract();
+void ChangeBase(int,int);
+int lookup(char);
+struct timeval tv;
+
+int num1,num2;
+char matrix[32],result[32];
+
+struct calculate
+{
+	char op[8],n1[32],n2[32];
+	int base1,base2;
+}calc;
+
+int main()
+{
+	FILE *f1,*f2;
+	f1=fopen("File1.txt","r");
+	f2=fopen("File2.dat","r");
+	InitializeBase(f1,f2);
+	return 0;	
+}
+
+int InitializeBase(FILE *f1,FILE *f2)
+{
+	rewind(f1);
+	rewind(f2);
+	char ch;
+	int counter=0;
+	while((ch=fgetc(f1))!=EOF)
+	{
+		matrix[counter++]=ch;
+	}
+	counter--;
+	while(fscanf(f2,"%s %d %s %d %s",calc.op,&calc.base1,calc.n1,&calc.base2,calc.n2)!=EOF)
+	{
+		if(strcmp("add",calc.op)==0)
+			add();
+		else
+			subtract();
+	}
+}
+
+void add()
+{
+	gettimeofday(&tv,NULL);
+	time_start = (tv.tv_sec *1e+6) + tv.tv_usec;
+
+	
+	int i,sum=0,j=0,temp;
+	char ch[32];
+	int n=strlen(calc.n1);
+	for(i=n-1;i>=0;i--)
+	{
+		temp=lookup(calc.n1[i]);
+		sum = sum + ((int)pow(calc.base1,j) * temp);
+		j++;
+	}
+	num1=sum;
+	n=strlen(calc.n2);
+	j=0;
+	sum=0;
+
+
+	for(i=n-1;i>=0;i--)
+	{
+		temp=lookup(calc.n2[i]);
+		sum = sum + ((int)pow(calc.base2,j) * temp);
+		j++;
+	}
+	num2=sum;
+	int res = num1 + num2,base=2;
+	if(calc.base1 > calc.base2)
+		base=calc.base1;
+	else
+		base=calc.base2;
+	ChangeBase(res,base);
+
+	gettimeofday (&tv, NULL);
+	time_end = (tv.tv_sec *1e+6) + tv.tv_usec;
+	long time= time_end-time_start;
+	printf("\n Time= %ld \n", time);
+
+	printf("%s(%d) + %s(%d) = %s(%d)\n",calc.n1,calc.base1,calc.n2,calc.base2,result,base);
+}
+
+void subtract()
+{
+	gettimeofday(&tv,NULL);
+	time_start = (tv.tv_sec *1e+6) + tv.tv_usec;
+
+	
+	int i,sum=0,j=0,temp;
+	char ch[32];
+	int n=strlen(calc.n1);
+	for(i=n-1;i>=0;i--)
+	{
+		temp=lookup(calc.n1[i]);
+		sum = sum + ((int)pow(calc.base1,j) * temp);
+		j++;
+	}
+	num1=sum;
+	n=strlen(calc.n2);
+	j=0;
+	sum=0;
+	for(i=n-1;i>=0;i--)
+	{
+		temp=lookup(calc.n2[i]);
+		sum = sum + ((int)pow(calc.base2,j) * temp);
+		j++;
+	}
+	num2=sum;
+
+
+	int res,base=2,flag=0;
+	if(num1>=num2)
+		res=num1-num2;
+	else
+	{
+		res=num2-num1;
+		flag=1;
+	}
+	if(calc.base1 > calc.base2)
+		base=calc.base1;
+	else
+		base=calc.base2;
+	ChangeBase(res,base);
+
+
+	gettimeofday (&tv, NULL);
+	time_end = (tv.tv_sec *1e+6) + tv.tv_usec;
+	long time= time_end-time_start;
+	printf("\n Time= %ld \n", time);
+
+	if(flag==1)
+		printf("%s(%d) - %s(%d) = -%s(%d)\n",calc.n1,calc.base1,calc.n2,calc.base2,result,base);
+	else
+		printf("%s(%d) - %s(%d) = %s(%d)\n",calc.n1,calc.base1,calc.n2,calc.base2,result,base);
+}
+
+
+
+void ChangeBase(int res,int base)
+{
+	char temp[32];
+	int i=0,j=-1,n=0;
+	for(i=0;i<32;i++)
+		result[i]='\0';
+	do
+	{
+		temp[n++]=matrix[res%base];
+		res=res/base;
+	}while(res >= base);
+	temp[n]=matrix[res];
+	for(i=n;i>=0;i--)
+	{
+		result[++j]=temp[i];
+	}
+}
+
+int lookup(char ch)
+{
+	int i;
+	for(i=0;i<32;i++)
+	{
+		if(ch==matrix[i])
+			return i;
+	}
+}
